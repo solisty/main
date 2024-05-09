@@ -1,0 +1,17 @@
+{
+    "name": "solisty/view",
+    "description": "Flame template engine package for solisty",
+    "autoload": {
+        "psr-4": {
+            "Solisty\\View\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "Fathi Helmi",
+            "email": "fathihelmi@outlook.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

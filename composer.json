@@ -1,0 +1,22 @@
+{
+	"name": "solisty/main",
+	"description": "The Solisty framework",
+	"version": "0.0.1",
+	"type": "library",
+	"autoload": {
+		"psr-4": {
+			"Solisty\\": "src/Solisty/"
+		},
+		"files": [
+			"src/Solisty/files/functions.php"
+		]
+	},
+	"authors": [
+		{
+			"name": "Fathi Helmi",
+			"email": "fathihelmi@outlook.com"
+		}
+	],
+	"minimum-stability": "dev",
+	"require": {}
+}
