@@ -49,4 +49,9 @@ class Path
             return false; // Relative path
         }
     }
+
+    public static function split($path)
+    {
+        return explode(DIRECTORY_SEPARATOR, $path);
+    }
 }
