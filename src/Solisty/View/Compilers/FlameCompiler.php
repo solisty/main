@@ -2,6 +2,8 @@
 
 namespace Solisty\View\Compilers;
 
+use Solisty\String\Str;
+
 class FlameCompiler
 {
     private array $compilers = [];
@@ -29,17 +31,16 @@ class FlameCompiler
 
     public function handleDirective($match)
     {
-
         $callback = '';
-        if (str_starts_with($match[0], "{'") && str_ends_with($match[0], "'}")) {
+        if (Str::endsWith($match[0], "{'") && Str::endsWith($match[0], "'}")) {
             $callback = $this->compilers['comment'];
-            $match[3] = trim($match[7]);
-        } else if (str_starts_with($match[0], "{%") && str_ends_with($match[0], "%}")) {
+            $match[3] = Str::trim($match[7]);
+        } else if (Str::startWith($match[0], "{%") && Str::endsWith($match[0], "%}")) {
             $callback = $this->compilers['echo'];
-            $match[3] = trim($match[5]);
-        } else if (str_starts_with($match[0], "{!") && str_ends_with($match[0], "!}")) {
+            $match[3] = Str::trim($match[5]);
+        } else if (Str::startWith($match[0], "{!") && Str::endsWith($match[0], "!}")) {
             $callback = $this->compilers['unsafe_echo'];
-            $match[3] = trim($match[8]);
+            $match[3] = Str::trim($match[8]);
         } else {
             $callback = $this->compilers[$match[1]];
         }
@@ -53,16 +54,16 @@ class FlameCompiler
         $next_pos = strpos($this->content, $match[0]);
         if ($next_pos !== false) {
             $compiled = $this->{$callback}($match[3]);
-            $this->content = substr_replace($this->content, $compiled, $next_pos, strlen($match[0]));
+            $this->content = Str::replaceAt($this->content, $compiled, $next_pos, strlen($match[0]));
 
             $compiled_end = $this->replace_end($match[1]);
 
             if (!empty($compiled_end)) {
                 $str_end = '#end' . $match[1];
-                $next_pos = strpos($this->content, $str_end);
+                $next_pos = Str::firstOffsetOf($this->content, $str_end);
 
                 if ($next_pos !== false) {
-                    $this->content = substr_replace($this->content, $compiled_end, $next_pos, strlen($str_end));
+                    $this->content = Str::replaceAt($this->content, $compiled_end, $next_pos, strlen($str_end));
                 }
             }
         }

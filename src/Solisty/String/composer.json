@@ -1,0 +1,15 @@
+{
+    "name": "solisty/string",
+    "description": "String utilities for solisty framework",
+    "authors": [
+        {
+            "name": "Fathi Helmi",
+            "email": "fathihelmi@outlook.com"
+        }
+    ],
+    "psr-4": {
+        "Solisty\\String\\": ""
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
