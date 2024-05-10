@@ -12,10 +12,19 @@ class Request
     public const HTTP_METHOD_PUT = 'PUT';
     public const HTTP_METHOD_PATCH = 'PATCH';
     public const HTTP_METHOD_DELETE = 'DELETE';
+    public const HTTP_METHOD_PURGE = 'PURGE';
+    public const HTTP_METHOD_OPTIONS = 'OPTIONS';
+    public const HTTP_METHOD_TRACE = 'TRACE';
+    public const HTTP_METHOD_CONNECT = 'CONNECT';
 
+
+    private HeaderList $header;
 
     private string $method;
-    private HeaderList $header;
+    private string $content;
+    private string $encoding;
+    private array $accepts;
+    private string $locale;
 
 
     public function __construct()
