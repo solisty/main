@@ -21,3 +21,4 @@ $app = Application::create([
 $request = Http::make();
 
 $app->handle($request);
+ppd($request);

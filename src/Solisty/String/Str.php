@@ -31,7 +31,7 @@ class Str
         return $pos !== false ? substr($str, $pos + strlen($what)) : '';
     }
 
-    public static function replace(string $str, string $lookup, string $replace): string
+    public static function replace(string $str, string|array $lookup, string|array $replace): string
     {
         return str_replace($lookup, $replace, $str);
     }
@@ -61,14 +61,14 @@ class Str
         return rtrim($str);
     }
 
-    public static function split(string $str): array
+    public static function split(string $str, string $separator): array
     {
-        return preg_split('/\s+/', $str);
+        return explode($separator, $str);
     }
 
-    public static function join(array $strings): string
+    public static function join(array $strings, string $separator = ''): string
     {
-        return implode('', $strings);
+        return implode($separator, $strings);
     }
 
     public static function uppercase(string $str): string
@@ -83,7 +83,7 @@ class Str
 
     public static function capitalize(string $str): string
     {
-        return ucfirst(strtolower($str));
+        return ucwords(Str::lowercase($str));
     }
 
     public static function slug(string $str): string
