@@ -1,0 +1,17 @@
+{
+    "name": "solisty/main",
+    "description": "The Entry point for the solisty framework",
+    "autoload": {
+        "psr-4": {
+            "Solisty\\Main\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "Fathi Helmi",
+            "email": "fathihelmi@outlook.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

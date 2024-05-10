@@ -1,0 +1,17 @@
+{
+    "name": "solisty/http",
+    "description": "a package that represents http requests and reponses",
+    "autoload": {
+        "psr-4": {
+            "Solisty\\Http\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "Fathi Helmi",
+            "email": "fathihelmi@outlook.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

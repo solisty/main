@@ -1,5 +1,7 @@
 <?php
 
+use Solisty\Main\Application;
+
 function view($name, $data = []) {}
 
 function route($name, ...$params) {}
@@ -23,3 +25,8 @@ function session(string $key, $value) {}
 
 function listify(...$args) {}
 
+function app($key) {
+    if (Application::$instance) {
+        return Application::$instance->retrieve($key);
+    }
+}
