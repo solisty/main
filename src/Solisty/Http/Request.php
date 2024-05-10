@@ -13,11 +13,13 @@ class Request {
         
     }
 
-    public function makeGet() {}
+    public static function makeGet() {}
 
-    public function makePost() {}
+    public static function makePost() {}
 
-    public function createEmpty() {}
+    public static function makeEmpty(): Request {
+        return new Request();
+    }
 
     public function parseFiles() {}
 

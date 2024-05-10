@@ -4,6 +4,7 @@ namespace Solisty\Main;
 
 use Solisty\Http\Request;
 use Solisty\Main\Interfaces\ApplicationInterface;
+use Solisty\Routing\Router;
 
 class Application extends Context implements ApplicationInterface
 {
@@ -40,6 +41,8 @@ class Application extends Context implements ApplicationInterface
         if (!static::$instance) {
             static::$instance = new Application($env, $debug);
         }
+
+        Router::run();
 
         return static::$instance;
     }

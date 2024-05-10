@@ -4,6 +4,12 @@ require 'vendor/autoload.php';
 
 use Solisty\Http\Http;
 use Solisty\Main\Application;
+use Solisty\Routing\Router;
+
+Router::get('/', function () {
+    echo 'yes';
+});
+
 
 $app = Application::create([
     'APP_NAME' => "solisty",

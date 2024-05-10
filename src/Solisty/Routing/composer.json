@@ -1,0 +1,17 @@
+{
+	"name": "solisty/router",
+	"description": "Routing engine for Solisty",
+	"autoload": {
+		"psr-4": {
+			"Solisty\\Routing\\": ""
+		}
+	},
+	"authors": [
+		{
+			"name": "Fathi Helmi",
+			"email": "fathihelmi@outlook.com"
+		}
+	],
+	"minimum-stability": "dev",
+	"require": {}
+}
