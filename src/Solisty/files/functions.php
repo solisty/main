@@ -4,37 +4,47 @@ use Solisty\Main\Application;
 use Solisty\Routing\Router;
 use Solisty\View\View;
 
-function view($name, $data = []) {
+function view($name, $data = [])
+{
     $view = new View();
     $view->show($name, $data);
 }
 
-function pp(...$args) {
+function pp(...$args)
+{
     echo '<pre>';
-    foreach($args as $arg) {
+    foreach ($args as $arg) {
         var_dump($arg);
     }
     echo '</pre>';
 }
 
-function ppd(...$args) {
+function ppd(...$args)
+{
     pp(...$args);
     die('');
 }
 
-function response() {}
+function response()
+{
+}
 
-function session(string $key, $value) {}
+function session(string $key, $value)
+{
+}
 
-function listify(...$args) {}
+function listify(...$args)
+{
+}
 
-function app($key) {
+function app($key)
+{
     if (Application::$instance) {
         return Application::$instance->retrieve($key);
     }
 }
 
-function getBaseUrl()
+function base_url()
 {
     $hostName = $_SERVER['HTTP_HOST'];
     $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"], 0, 5)) == 'https' ? 'https' : 'http';
@@ -45,4 +55,11 @@ function getBaseUrl()
 function route($name, ...$params)
 {
     return Router::generateURL($name, ...$params);
+}
+
+function env($key)
+{
+    $val = app('env')->get($key);
+    if ($val) return $val;
+    return '';
 }

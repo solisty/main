@@ -21,9 +21,10 @@ class DependencyInjector
             if ($binding instanceof \Closure) {
                 $result = $binding();
 
-                if ($this->bound($result)) {
+                if (is_string($result) && $this->bound($result)) {
                     return $this->resolve($result);
                 }
+
                 if (is_subclass_of($result, $class)) {
 
                     return $this->instance($result);
@@ -85,17 +86,32 @@ class DependencyInjector
     public function bind($key, $value)
     {
         $this->bindings[$key] = $value;
+
+        return $this;
     }
 
-    public function call(callable $callback, array $dependencies = [])
+    // add a string shortcut to the last added binding
+    public function shortcut(string $shortcut)
+    {
+        if ($this->bound($shortcut)) return;
+        $keys = array_keys($this->bindings);
+        $last = end($keys);
+        $this->bindings[$shortcut] = $this->bindings[$last];
+
+        // if ()
+    }
+
+    public function call($callback, array $dependencies = [])
     {
         $reflection = is_array($callback) ? new ReflectionMethod($callback[0], $callback[1]) : new ReflectionFunction($callback);
         $parameters = $reflection->getParameters();
-        
+
         $resolvedDependencies = [];
         foreach ($parameters as $parameter) {
-            $dependencyClass = $parameter->getType()->getName();
-            if ($dependencyClass !== null) {
+            $dependencyClass = $parameter->getType() ? $parameter->getType()->getName() : null;
+            if ($dependencyClass !== null && isset($dependencies[$dependencyClass])) {
+                $resolvedDependencies[] = $dependencies[$dependencyClass];
+            } elseif ($dependencyClass !== null) {
                 $resolvedDependencies[] = $this->resolve($dependencyClass);
             } elseif (isset($dependencies[$parameter->name])) {
                 $resolvedDependencies[] = $dependencies[$parameter->name];
@@ -105,6 +121,10 @@ class DependencyInjector
                 throw new Exception("Unable to resolve dependency for parameter '{$parameter->name}'");
             }
         }
-        return $reflection->invokeArgs($resolvedDependencies);
+
+        // Determine the object to invoke the method on
+        $object = is_array($callback) ? $this->resolve($callback[0]) : null;
+
+        return $reflection->invokeArgs($object, $resolvedDependencies);
     }
 }

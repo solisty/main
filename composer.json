@@ -17,6 +17,5 @@
 			"email": "fathihelmi@outlook.com"
 		}
 	],
-	"minimum-stability": "dev",
-	"require": {}
+	"minimum-stability": "dev"
 }

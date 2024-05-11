@@ -28,4 +28,8 @@ abstract class Context implements ContextInterface
     public function retrieve($key) {
         return $this->injector->resolve($key);
     }
+
+    public function call(string $class, string $method) {
+        $this->injector->call([$class, $method]);
+    }
 }

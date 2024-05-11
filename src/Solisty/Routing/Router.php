@@ -190,7 +190,7 @@ class Router
                     $parameters[$key] = $params[array_search($key, array_keys($parameters))];
                 }
 
-                $base = getBaseUrl();
+                $base = base_url();
                 $uri = [];
                 $nextParam = 0;
 
