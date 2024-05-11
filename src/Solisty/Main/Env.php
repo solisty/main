@@ -10,7 +10,8 @@ class Env extends HashList
     public function __construct(array $env)
     {
         $dotenv = Dotenv::createImmutable($env['APP_BASE']);
-
+        $dotenv->load();
+        
         foreach($env as $key => $value) {
             $this->add($key, $value);
         }
