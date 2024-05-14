@@ -63,7 +63,7 @@ class Application extends Context implements ApplicationInterface
         // TODO: get cache driver from config
         // TODO: set up file cache path
         $this->injector->bind(Cache::class, function () {
-            return new Cache();
+            return (new Cache())->driver();
         })->shortcut("cache");
     }
 

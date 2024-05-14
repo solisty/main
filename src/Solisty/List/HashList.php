@@ -4,7 +4,9 @@ namespace Solisty\List;
 
 use Solisty\List\Interfaces\HashListInterface;
 use Solisty\List\Interfaces\ListInterface;
-class HashList implements ListInterface, HashListInterface {
+
+class HashList implements ListInterface, HashListInterface
+{
     protected array $data;
 
     public function __construct()
@@ -16,6 +18,15 @@ class HashList implements ListInterface, HashListInterface {
     {
         $index = $this->hash($key);
         $this->data[$index] = ['key' => $key, 'value' => $value];
+    }
+
+    public function addObjects($keyAttributeName, array $objects)
+    {
+        foreach ($objects as $object) {
+            $key = $object->$keyAttributeName;
+            $index = $this->hash($key);
+            $this->data[$index] = ['key' => $key, 'value' => $object];
+        }
     }
 
     public function removeAt($key)
@@ -59,7 +70,7 @@ class HashList implements ListInterface, HashListInterface {
     public function each($callback)
     {
         foreach ($this->data as $item) {
-            $callback($item);
+            $callback($item['value']);
         }
     }
 
@@ -112,11 +123,13 @@ class HashList implements ListInterface, HashListInterface {
         return array_slice($this->data, $start, $end - $start);
     }
 
-    public function first() {
+    public function first()
+    {
         return reset($this->data);
     }
 
-    public function get($key) {
+    public function get($key)
+    {
         $index = $this->hash($key);
         if (isset($this->data[$index])) {
             return $this->data[$index]['value'];

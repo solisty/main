@@ -27,8 +27,16 @@ class Directory implements DirectoryInterface
 
     public function list(): array
     {
+        $openFiles = [];
         if ($this->isOpen()) {
-            return Directory::ls($this->path);
+            foreach(Directory::ls($this->path) as $path) {
+                $file = new File();
+                $file->open($this->path . '/' . $path);
+                if ($file->isOpen()) {
+                    $openFiles[] = $file;
+                }
+            }
+            return $openFiles;
         } else {
             return [];
         }

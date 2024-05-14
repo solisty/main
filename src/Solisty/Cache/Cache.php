@@ -10,10 +10,14 @@ class Cache
 
     public function __construct()
     {
-        $this->driver = new FileCache('');
+        $this->driver = new FileCache('', '');
     }
 
     public function getDriverClassPath() {
 
+    }
+
+    public function driver() {
+        return $this->driver;
     }
 }

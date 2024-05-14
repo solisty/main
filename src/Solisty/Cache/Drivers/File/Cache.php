@@ -2,86 +2,106 @@
 
 namespace Solisty\Cache\Drivers\File;
 
+use DateTime;
+use Dotenv\Exception\InvalidPathException;
 use Solisty\Cache\Interfaces\CacheInterface;
+use Solisty\FileSystem\Directory;
+use Solisty\FileSystem\File;
+use Solisty\List\ArrayList;
+use Solisty\String\Str;
 
 class Cache implements CacheInterface
 {
-    private $cacheDirectory;
+    private Directory $cacheDir;
+    private File $currentFile;
 
-    public function __construct(string $cacheDirectory)
+    public function __construct(string $path = "")
     {
-        $this->cacheDirectory = rtrim($cacheDirectory, '/') . '/';
-        if (!is_dir($this->cacheDirectory)) {
-            mkdir($this->cacheDirectory, 0777, true);
+        if (empty($path)) {
+            $path = app('path.app') . '/vault/cache';
         }
-    }
 
-    public function cacheFile($filePath)
-    {
-        $fileName = basename($filePath);
-        copy($filePath, $this->cacheDirectory . $fileName);
-        return $fileName;
-    }
+        $this->cacheDir = new Directory();
+        $this->cacheDir->open($path);
 
-    public function cacheContent($key, string $content, int $duration = null)
-    {
-        $fileName = uniqid('cache_') . '.txt';
-        file_put_contents($this->cacheDirectory . $fileName, $content);
-        if ($duration !== null) {
-            touch($this->cacheDirectory . $fileName, time() + $duration);
+        if (!$this->cacheDir->isOpen()) {
+            throw new InvalidPathException("Cache: Invalid cache path");
         }
-        return $fileName;
+
+        $this->setOpenFile();
     }
 
-    public function prepare(array $keys)
+    public function setOpenFile()
     {
-        $cachedFiles = [];
-        foreach ($keys as $key) {
-            $cachedFiles[$key] = $this->cacheDirectory . $key;
-        }
-        return $cachedFiles;
-    }
-
-    public function loadAll(): array
-    {
-        $files = scandir($this->cacheDirectory);
-        $cachedData = [];
-        foreach ($files as $file) {
-            if ($file !== '.' && $file !== '..') {
-                $cachedData[$file] = file_get_contents($this->cacheDirectory . $file);
+        $last = new File();
+        $lastTimestamp = 0;
+        // open the most recent cache file
+        foreach ($this->cacheDir->list() as $file) {
+            $date = new DateTime(Str::split($file->name(), ".")[0]);
+            $tp = $date->getTimestamp();
+            if ($tp > $lastTimestamp) {
+                $last = $file;
+                $lastTimestamp = $tp;
             }
         }
-        return $cachedData;
+        $this->currentFile = $last;
     }
 
-    public function cached($key)
+    public function set($key, $value, $dur = 0)
     {
-        return file_exists($this->cacheDirectory . $key);
-    }
+        if ($this->currentFile->isOpen()) {
 
-    public function remove($key)
-    {
-        if ($this->cached($key)) {
-            unlink($this->cacheDirectory . $key);
+            $hasSet = $this->currentFile->eachLine(function ($l, $line) use ($key, $value) {
+                $arr = unserialize($l);
+                if (isset($arr[$key])) {
+                    $this->currentFile->replaceLine($line, serialize([$key => $value]));
+                    return true;
+                }
+            });
+
+            if (!$hasSet) {
+                $this->currentFile->appendContent(serialize([$key => $value]));
+                $this->currentFile->appendContent(PHP_EOL);
+            }
         }
     }
 
-    public function flush()
+    public function get($key)
     {
-        $files = glob($this->cacheDirectory . '*');
-        foreach ($files as $file) {
-            unlink($file);
-        }
+
+        $val = null;
+        $this->currentFile->eachLine(function ($l) use ($key, &$val) {
+            $arr = unserialize($l);
+            if (isset($arr[$key])) {
+                return $val = $arr[$key];
+            }
+        });
+
+        return $val;
     }
 
-    public function tmp($key, $content)
+    public function remove($key): bool
     {
-        return is_file($this->cacheDirectory . $key) ? $this->cacheDirectory . $key : $content;
+        return true;
     }
 
-    public function loadJson($key)
+    public function has($key): bool
     {
-        $jsonData = file_get_contents($this->cacheDirectory . $key);
-        return json_decode($jsonData, true);
+        return true;
+    }
+
+    public function clear(): ArrayList
+    {
+        return new ArrayList();
+    }
+
+    public function empty(): bool
+    {
+        return true;
+    }
+
+    public static function getDriverName(): string
+    {
+        return "file";
     }
 }

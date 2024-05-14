@@ -2,26 +2,21 @@
 
 namespace Solisty\Cache\Interfaces;
 
+use Solisty\List\ArrayList;
+
 interface CacheInterface
 {
-    // cache a file
-    public function cacheFile($filePath);
+    public function set($key, $value);
 
-    // cache a string
-    public function cacheContent($key, string $content);
+    public function get($key);
 
-    // read all cache files and keys for easy access
-    public function prepare(array $keys);
+    public function remove($key): bool;
 
-    // load all cache into memery
-    public function loadAll(): array;
+    public function has($key): bool;
 
-    // check if key is cached
-    public function cached($key);
+    public function clear(): ArrayList;
 
-    // check if content is a file otherwire a string
-    public function tmp($key, $content);
+    public function empty(): bool;
 
-    // load a cache entry as json
-    public function loadJson($key);
+    public static function getDriverName(): string;
 }
