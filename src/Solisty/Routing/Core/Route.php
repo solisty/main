@@ -39,8 +39,8 @@ class Route
 
         if (is_array($this->handler) && count($this->handler) === 2) {
             $class = $this->handler[0];
-            $handler = app('app')->call($class, $this->handler[1]);
-            return $handler;
+            $return = app('app')->call($class, $this->handler[1]);
+            return $return;
         }
 
         throw new Exception('Invalid handler provided.');

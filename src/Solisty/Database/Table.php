@@ -3,6 +3,8 @@
 namespace Solisty\Database;
 
 class Table {
+    private Operation $createOperation;
+     
     public static function new(string $name, array $columns): Table {
         ppd($columns);
 

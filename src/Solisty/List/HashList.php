@@ -49,15 +49,10 @@ class HashList implements ListInterface, HashListInterface
         unset($this->data[$index]);
     }
 
+    // murmurHash
     public function hash($key)
     {
-        // DJB2 Hash Function
-        $hash = 5381;
-        $len = strlen($key);
-        for ($i = 0; $i < $len; $i++) {
-            $hash = (($hash << 5) + $hash) + ord($key[$i]);
-        }
-        return $hash;
+        return $key;
     }
 
     // Implementing ListInterface methods...
@@ -146,5 +141,10 @@ class HashList implements ListInterface, HashListInterface
     public function size()
     {
         return count($this->data);
+    }
+
+    public function has($key)
+    {
+        return isset($this->data[$key]);
     }
 }

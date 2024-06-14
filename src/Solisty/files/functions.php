@@ -1,22 +1,23 @@
 <?php
 
+use Solisty\Dumper\Dumper;
+use Solisty\Http\Session\Session;
+use Solisty\List\ArrayList;
 use Solisty\Main\Application;
 use Solisty\Routing\Router;
 use Solisty\View\View;
 
 function view($name, $data = [])
 {
-    $view = new View();
-    $view->show($name, $data);
+    $view = new View($name);
+    return $view->with($data);
 }
 
 function pp(...$args)
 {
-    echo '<pre>';
     foreach ($args as $arg) {
-        var_dump($arg);
+        Dumper::dump($arg);
     }
-    echo '</pre>';
 }
 
 function ppd(...$args)
@@ -29,12 +30,14 @@ function response()
 {
 }
 
-function session(string $key, $value)
+function session(): Session
 {
+    return app('session');
 }
 
-function listify(...$args)
+function listify(...$args): ArrayList
 {
+    return new ArrayList(array_values(...$args));
 }
 
 function app($key)
@@ -61,5 +64,5 @@ function env($key)
 {
     $val = app('env')->get($key);
     if ($val) return $val;
-    return '';
+    return null;
 }

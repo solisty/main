@@ -128,4 +128,47 @@ class Str
     {
         return urldecode($str);
     }
+
+    public static function pluralize($word)
+    {
+        $irregular = array(
+            'child' => 'children',
+            'man' => 'men',
+            'woman' => 'women',
+            'tooth' => 'teeth',
+            'foot' => 'feet',
+            'person' => 'people',
+            'mouse' => 'mice'
+        );
+
+        if (array_key_exists($word, $irregular)) {
+            return $irregular[$word];
+        }
+
+        $uncountable = array(
+            'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep'
+        );
+
+        if (in_array($word, $uncountable)) {
+            return $word;
+        }
+
+        $lastChar = strtolower($word[strlen($word) - 1]);
+
+        switch ($lastChar) {
+            case 'y':
+                if (preg_match('/[aeiou]y$/i', $word)) {
+                    return $word . 's';
+                }
+                return substr($word, 0, -1) . 'ies';
+            case 's':
+            case 'x':
+            case 'z':
+            case 'ch':
+            case 'sh':
+                return $word . 'es';
+            default:
+                return $word . 's';
+        }
+    }
 }

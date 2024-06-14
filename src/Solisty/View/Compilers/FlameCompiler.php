@@ -12,7 +12,7 @@ class FlameCompiler
     public function compileString(string $content): void
     {
         $this->content = $content;
-        $regex = "/(?:(#([a-z]+\s*))(\((.*)\)))|{%(.*)%}|({'(.*)'})|{!(.*)!}/im";
+        $regex = "/(?:(#([a-z]+\s*))(\((.*)\)))|{%(.*?)%}|({'(.*?)'})|{!(.*?)!}/im";
         preg_match_all($regex, $content, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 
         foreach ($matches as $match) {

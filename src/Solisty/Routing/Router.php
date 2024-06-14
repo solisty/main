@@ -68,16 +68,13 @@ class Router
         $route = self::$routeList->search(new URI($user_uri));
 
         if ($route && $route->getMethod() == $user_method) {
-            $route->handle();
+            $controllerValue = $route->handle();
             $route->postHandleMiddlewares();
         } else {
-            try {
-                self::$instance->performTests($route, $user_uri, $user_method);
-            } catch (Exception $e) {
-                print($e->getMessage());
-                return false;
-            }
+            self::$instance->performTests($route, $user_uri, $user_method);
         }
+    
+        app('app')->setControllerValue($controllerValue);
 
         return true;
     }
@@ -124,7 +121,7 @@ class Router
         if ($options && count($options) > 0) {
             $_p = $options['prefix'] ?? false;
             $_m = $options['middleware'] ?? false;
-            
+
             if ($callback) {
                 call_user_func($callback);
             }
@@ -138,7 +135,6 @@ class Router
                 if ($_m)
                     $route->middleware($_m);
             });
-
         }
 
         self::$routeList->mergeAtTail(self::$tmpGroup);
@@ -195,7 +191,7 @@ class Router
                 $nextParam = 0;
 
                 foreach ($segments as $i => $seg) {
-                    if ($seg[0] == '{') {
+                    if (!empty($seg) && $seg[0] == '{') {
                         $uri[$i] = $parameters[array_keys($parameters)[$nextParam]];
                         $nextParam++;
                     } else {
@@ -205,10 +201,10 @@ class Router
 
                 return $base . implode("/", $uri);
             } else {
-                return die("Parameters provided for route '$routeName' do not match parameters count");
+                return throw new Exception("Parameters provided for route '{$routeName}' do not match parameters count");
             }
         } else {
-            return die("No route with name '$routeName'");
+            return throw new Exception("No route with name '{$routeName}'");
         }
     }
 }

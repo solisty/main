@@ -2,6 +2,7 @@
 
 namespace Solisty\View;
 
+use Exception;
 use Solisty\View\Interfaces\ViewInterface;
 
 class View extends Template implements ViewInterface
@@ -9,9 +10,14 @@ class View extends Template implements ViewInterface
     private string $compiledPath = "";
     private string $htmlContent = "";
     private array $data = [];
+    private bool $setup = false;
 
-    public function __construct()
+    public function __construct($name = null)
     {
+        if ($name) {
+            $this->setTemplatePath($name);
+            $this->setup = true;
+        }
         parent::__construct();
     }
 
@@ -21,8 +27,11 @@ class View extends Template implements ViewInterface
             $this->setTemplatePath($view);
         }
 
-        $this->compile($this->getTemplatePath());
-        $this->prepareInstance();
+        if ($this->setup) {
+            $this->compileView();
+        } else {
+            throw new Exception("Trying to compile an empty view");
+        }
 
         extract($this->data);
         extract($data);

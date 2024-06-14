@@ -2,9 +2,19 @@
 
 namespace Solisty\Database;
 
-class Model
+use Exception;
+use Solisty\Database\Traits\MassAssignable;
+
+class Model extends Queryable
 {
+    // use HasQueries;
+    // use HasIndex;
+    // use Paginated;
+    // use Duplicatable;
+    use MassAssignable;
+
     protected array $relations;
+    private array $propreties = [];
 
     public function save()
     {
@@ -16,5 +26,40 @@ class Model
 
     public function getProperties()
     {
+        return $this->propreties;
+    }
+
+    protected function saving()
+    {
+        echo 'saving model';
+    }
+
+    public static function fromResult($results)
+    {
+        $callingClass = static::class;
+        $object = new $callingClass;
+
+        $object->propreties = $results;
+
+        return $object;
+    }
+
+    public function __get($prop)
+    {
+        if (isset($this->propreties[$prop])) {
+            return $this->propreties[$prop];
+        } else {
+            throw new Exception("Undefined properity '$prop' on model: " . static::class);
+        }
+    }
+
+    public function assign(string $prop, $value): bool
+    {
+        if ($this->isAssignable($prop)) {
+            $this->propreties[$prop] = $value;
+            return true;
+        }
+
+        return false;
     }
 }

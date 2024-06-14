@@ -11,7 +11,7 @@ class Env extends HashList
     {
         Dotenv::createImmutable($env['APP_BASE'])
             ->load();
-
+    
         foreach ($env as $key => $value) {
             $this->add($key, $value);
         }

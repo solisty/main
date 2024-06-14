@@ -4,41 +4,37 @@ namespace Solisty\Main;
 
 use Dotenv\Exception\InvalidPathException;
 use Solisty\Cache\Cache;
+use Solisty\Database\Database;
 use Solisty\FileSystem\Directory;
 use Solisty\Http\Request;
+use Solisty\Http\Session\Session;
 use Solisty\Main\Interfaces\ApplicationInterface;
 use Solisty\Routing\Router;
 
 class Application extends Context implements ApplicationInterface
 {
     private string $appBase;
-    private string $routesPath;
+    private Database $db;
     private string $configPath;
     private bool $started = false;
-    private bool $debug = false;
     public static ?Application $instance = null;
 
-    public function __construct(array $env, bool $debug)
+    public function __construct(public array $envo, public bool $debug)
     {
-        $this->setEnv($env);
-        $this->debug = $debug;
-        $this->injector = new DependencyInjector();
-
-        static::$instance = $this;
-
         $this->initialize();
         $this->bindCommon();
         $this->bindConfigs();
         $this->bindPaths();
-
-
         Router::run();
     }
 
     public function handle(Request $request)
     {
+        // make the current request accessible to the rest of the app
         $this->injector->bind(Request::class, $request);
+        // create a response
         $response = $this->makeResponse($request);
+        // send it!
         $response->send();
     }
 
@@ -53,12 +49,19 @@ class Application extends Context implements ApplicationInterface
 
     public function bindCommon()
     {
+        // order is important
         $this->injector
             ->bind('app.started', $this->started)
             ->bind('app.debug', $this->debug)
-            ->bind('app', $this)
-            ->bind('router', Router::class)
-            ->bind('env', $this->env);
+            ->bind('env', $this->env)
+            ->bind('session', new Session)
+            ->bind('app', $this);
+
+        $this->db = new Database();
+        $this->db->connect();
+
+        $this->injector->bind('db', $this->db)
+            ->bind('router', Router::class);
 
         // TODO: get cache driver from config
         // TODO: set up file cache path
@@ -97,6 +100,23 @@ class Application extends Context implements ApplicationInterface
 
     public function initialize()
     {
+        $whoops = new \Whoops\Run;
+        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+        $whoops->register();
+
+        $this->setEnv($this->envo);
+        $this->injector = new DependencyInjector();
+        static::$instance = $this;
         $this->appBase = $this->env->get('APP_BASE');
+    }
+
+    public function bind($key, $value)
+    {
+        $this->injector->bind($key, $value);
+    }
+
+    public function setControllerValue($value)
+    {
+        $this->controllerValue = $value;
     }
 }
