@@ -4,6 +4,10 @@ namespace Solisty\Database;
 
 use Exception;
 use LengthException;
+use Solisty\List\ArrayList;
+use Solisty\String\Str;
+use Solisty\FileSystem\Directory;
+use Solisty\String\Path;
 
 class QueryBuilder
 {
@@ -14,6 +18,12 @@ class QueryBuilder
     private array $arrayColumns;
     private array $whereClauses = [];
     private array $values = [];
+
+    public function __construct()
+    {
+        // by default set to '*' and later can be changed by setColumns
+        $this->setColumns();
+    }
 
     public static function mysql_getInsertOneQuery(array $one, string $table): string
     {
@@ -54,7 +64,7 @@ class QueryBuilder
     {
         $select = "SELECT {$this->columns} FROM {$this->table} {$this->getWhereClausesAsString()}";
         $this->query = $select;
-
+        $this->buildSelectSQLQuery();
         return $this;
     }
 
@@ -81,7 +91,6 @@ class QueryBuilder
 
     public function getWhereClausesAsString(): string
     {
-        $where = "";
         $c = count($this->whereClauses);
         if ($c > 0) {
             $where = "WHERE ";
@@ -89,16 +98,21 @@ class QueryBuilder
                 // $formatted = app('db')->getDriver()->typeFormat($clause[2]);
                 $where .= "{$clause[0]}{$clause[1]}?";
                 $where .= ($i != $c - 1) ? ' AND ' : '';
-                $this->values[] = $clause[2];
             }
+            return $where;
         }
 
-        return $where;
+        return '';
     }
 
     public function setOrderBy(string $order, string $direction = 'ASC'): QueryBuilder
     {
         return $this;
+    }
+
+    public function where(string $column, $op, $value = null): QueryBuilder
+    {
+        return $this->addWhereClause($column, $op, $value);
     }
 
     public function addWhereClause(string $column, $op, $value = null): QueryBuilder
@@ -114,6 +128,8 @@ class QueryBuilder
             $value
         ];
 
+        $this->values[] = $value;
+
         return $this;
     }
 
@@ -122,17 +138,46 @@ class QueryBuilder
         return $this;
     }
 
-    public function get(): array
+    public function get(): ArrayList
     {
-        $this->buildSQLQuery();
+        // find the model class
+        // a hard guess!
+        // TODO: get the calling class instead
+        $modelName = Str::capitalize(Str::singularize($this->table));
+        $class = Directory::underNamespace('App\\Models')->find($modelName . '.php');
+        $model = new (Path::toNamespaced($class));
+
+        $db = app('db');
+        $this->buildSelectSQLQuery();
+        [$query, $values] = $this->getRawQuery();
+        $db->query($query, $values);
+
+        $result = $db->getDriver()->fetchAll();
+        $list = listify([]);
+
+        foreach ($result as $row) {
+            $list->add($model::fromResult($row));
+        }
+
+        return $list;
+    }
+
+    public function getRawQuery(): array
+    {
         return [
             $this->query,
             $this->values,
         ];
     }
 
-    private function buildSQLQuery(): string
+    private function buildSelectSQLQuery(): string
     {
-        return "SELECT * FROM {$this->table}";
+        $this->query = "SELECT {$this->getColumnNamesAsString()} FROM {$this->table} {$this->getWhereClausesAsString()}";
+        return $this->query;
+    }
+
+    public function getColumnNamesAsString()
+    {
+        return implode(',', $this->arrayColumns);
     }
 }

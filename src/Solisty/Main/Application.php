@@ -3,6 +3,7 @@
 namespace Solisty\Main;
 
 use Dotenv\Exception\InvalidPathException;
+use Solisty\Authentication\Auth;
 use Solisty\Cache\Cache;
 use Solisty\Database\Database;
 use Solisty\FileSystem\Directory;
@@ -19,13 +20,16 @@ class Application extends Context implements ApplicationInterface
     private bool $started = false;
     public static ?Application $instance = null;
 
-    public function __construct(public array $envo, public bool $debug)
+    public function __construct(public array $envo, public bool $debug, public bool $cliMode)
     {
         $this->initialize();
         $this->bindCommon();
         $this->bindConfigs();
         $this->bindPaths();
-        Router::run();
+
+        if (!$this->cliMode) {
+            Router::run();
+        }
     }
 
     public function handle(Request $request)
@@ -38,10 +42,10 @@ class Application extends Context implements ApplicationInterface
         $response->send();
     }
 
-    public static function create(array $env, bool $debug)
+    public static function create(array $env, bool $debug = false, bool $cliMode = false)
     {
         if (!static::$instance) {
-            static::$instance = new Application($env, $debug);
+            static::$instance = new Application($env, $debug, $cliMode);
         }
 
         return static::$instance;
@@ -54,13 +58,19 @@ class Application extends Context implements ApplicationInterface
             ->bind('app.started', $this->started)
             ->bind('app.debug', $this->debug)
             ->bind('env', $this->env)
-            ->bind('session', new Session)
             ->bind('app', $this);
 
-        $this->db = new Database();
-        $this->db->connect();
+        if (!$this->cliMode) {
+            $this->db = new Database();
+            $this->db->connect();
 
-        $this->injector->bind('db', $this->db)
+            $this->injector
+                ->bind('session', new Session)
+                ->bind('auth', new Auth)
+                ->bind('db', $this->db);
+        }
+
+        $this->injector
             ->bind('router', Router::class);
 
         // TODO: get cache driver from config

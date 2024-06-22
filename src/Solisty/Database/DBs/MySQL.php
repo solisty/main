@@ -91,12 +91,18 @@ class MySQL implements DBInterface
         return $this->prepared->execute($bindValues);;
     }
 
+    public function query($query): bool
+    {
+        $this->prepared = $this->pdo->prepare($query);
+        return $this->prepared->execute();
+    }
+
     public function fetchOne(): array
     {
         return $this->prepared->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function get()
+    public function fetchAll()
     {
         return $this->prepared->fetchAll(PDO::FETCH_ASSOC);
     }

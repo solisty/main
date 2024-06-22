@@ -8,7 +8,10 @@ use Solisty\FileSystem\Interfaces\DirectoryInterface;
 
 class Directory implements DirectoryInterface
 {
-    protected $path;
+
+    public function __construct(protected $path = '')
+    {
+    }
 
     public function open(string $dirpath)
     {
@@ -29,7 +32,7 @@ class Directory implements DirectoryInterface
     {
         $openFiles = [];
         if ($this->isOpen()) {
-            foreach(Directory::ls($this->path) as $path) {
+            foreach (Directory::ls($this->path) as $path) {
                 $file = new File();
                 $file->open($this->path . '/' . $path);
                 if ($file->isOpen()) {
@@ -102,5 +105,24 @@ class Directory implements DirectoryInterface
     public static function exists(string $path)
     {
         return file_exists($path) && is_dir($path);
+    }
+
+    public static function underNamespace($namespace): Directory
+    {
+        $path = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
+        $path = env('APP_BASE') . DIRECTORY_SEPARATOR . $path;
+        return new Directory($path);
+    }
+
+    // finds a file under the open directory
+    public function find($file): string
+    {
+        $files = static::traverse($this->path);
+        foreach ($files as $f) {
+            if (basename($f) == $file) {
+                return $f;
+            }
+        }
+        return '';
     }
 }

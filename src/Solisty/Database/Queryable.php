@@ -9,34 +9,41 @@ use Solisty\String\Str;
 class Queryable implements QueryableInterface
 {
     protected static string $table = '';
-    private static QueryBuilder $query;
+    private static QueryBuilder $queryBuilder;
 
     public static function select(array $columns)
     {
         return new Queryable();
     }
 
-    public static function where()
+    public static function where($column, $op = '=', $value = null): QueryBuilder
     {
-        return new Queryable();
+        if (!self::$queryBuilder->setup()) {
+            static::setTable();
+            self::$queryBuilder->addWhereClause($column, '=', $op);
+        }
+
+        return self::$queryBuilder;
     }
 
     public static function init()
     {
-        static::$query = new QueryBuilder();
+        static::$queryBuilder = new QueryBuilder();
     }
 
     public static function find($id)
     {
         $db = app('db');
-        if (!self::$query->setup()) {
+        if (!self::$queryBuilder->setup()) {
             static::setTable();
-            self::$query->addWhereClause('id', $id);
-            self::$query->setColumns('*')->select();
         }
 
-        [$query, $values] = self::$query->get();
+        self::$queryBuilder->addWhereClause('id', $id);
+        self::$queryBuilder->setColumns('*')->select();
+
+        [$query, $values] = self::$queryBuilder->getRawQuery();
         $db->query($query, $values);
+        
         return static::class::fromResult($db->getDriver()->fetchOne());
     }
 
@@ -49,12 +56,16 @@ class Queryable implements QueryableInterface
             $modelPath = Str::split(static::class, '\\');
             $table = Str::pluralize(Str::lowercase(end($modelPath)));
         }
-        self::$query->setTable($table);
+        self::$queryBuilder->setTable($table);
     }
 
     public static function get()
     {
-        return new Queryable();
+        $db = app('db');
+        [$query, $values] = self::$queryBuilder->getRawQuery();
+        $db->query($query, $values);
+        // self::$queryBuilder->reset();
+        return static::class::fromResult($db->getDriver()->fetchOne());
     }
 
     public static function search()
@@ -91,10 +102,10 @@ class Queryable implements QueryableInterface
     {
         $db = app('db');
 
-        if (!self::$query->setup()) {
+        if (!self::$queryBuilder->setup()) {
             static::setTable();
-            $db->query(self::$query->getTableInfo(), []);
-            $columns = $db->getDriver()->get();
+            $db->query(self::$queryBuilder->getTableInfo(), []);
+            $columns = $db->getDriver()->fetchAll();
             $model = static::class;
             $object = new $model;
 
@@ -111,10 +122,10 @@ class Queryable implements QueryableInterface
             foreach ($data as $key => $value) {
                 $object->assign($key, $value);
             }
-            
-            self::$query->setColumns(array_keys($data));
-            self::$query->insert($data);
-            [$query, $values] = self::$query->get();
+
+            self::$queryBuilder->setColumns(array_keys($data));
+            self::$queryBuilder->insert($data);
+            [$query, $values] = self::$queryBuilder->getRawQuery();
             $db->query($query, $values);
         }
     }

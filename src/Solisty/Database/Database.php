@@ -72,4 +72,14 @@ class Database
     {
         return $this->driver->queryUsing($query, $values);
     }
+
+    public function createTable(Table $table)
+    {
+        $sql = "CREATE TABLE {$table->name} ({$table->getColumnsAsSQL()})";
+        $resutl = $this->driver->query($sql);
+
+        if ($resutl) {
+            echo "table created: {$table->name}";
+        }
+    }
 }

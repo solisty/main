@@ -21,17 +21,19 @@ class CommandLine
 
     public function run()
     {
+        $found = false;
         $this->commands->each(
-            function (Command $c) {
+            function (Command $c) use (&$found) {
                 if ($c->match($this->argv)) {
                     $c->onStart([]);
                     $c->run($this->argv);
+                    $found = true;
                     return $c->onExit(0);
                 }
-
-                $this->panic();
             }
         );
+
+        if (!$found) $this->panic();
     }
 
     public function loadBuiltInCommands()
@@ -53,6 +55,6 @@ class CommandLine
 
     public function panic()
     {
-        echo 'Command not found';
+        printf("\n%s\n", 'Command not found');
     }
 }

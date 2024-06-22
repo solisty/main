@@ -29,6 +29,11 @@ class Model extends Queryable
         return $this->propreties;
     }
 
+    public function setProperty($name, $value)
+    {
+        $this->propreties[$name] = $value;
+    }
+
     protected function saving()
     {
         echo 'saving model';
@@ -61,5 +66,27 @@ class Model extends Queryable
         }
 
         return false;
+    }
+
+    public static function __callStatic($name, $arguments)
+    {
+        switch ($name) {
+            case 'create':
+                return static::insert($arguments[0]);
+            default:
+                throw new Exception("Method $name does not exist on model: " . static::class);
+        }
+    }
+
+    public function __call($name, $arguments)
+    {
+        return $this;
+    }
+
+    public function __set($name, $value)
+    {
+        if (isset($this->getProperties()[$name])) {
+            $this->setProperty($name, $value);
+        }
     }
 }

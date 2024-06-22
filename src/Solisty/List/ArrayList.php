@@ -83,8 +83,10 @@ class ArrayList implements ListInterface, ArrayListInterface
         return end($this->data);
     }
 
-    public function first() {
-        return reset($this->data);
+    public function first()
+    {
+        $item = reset($this->data);
+        return  $item ? $item : null;
     }
 
     public function toArray()
@@ -94,6 +96,7 @@ class ArrayList implements ListInterface, ArrayListInterface
 
     public function at($index)
     {
+        if ($index < 0 || $index >= $this->size) return null;
         return $this->data[$index];
     }
 

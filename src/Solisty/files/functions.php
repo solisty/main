@@ -30,7 +30,12 @@ function response()
 {
 }
 
-function session(): Session
+function auth()
+{
+    return app('auth');
+}
+
+function session(): ?Session
 {
     return app('session');
 }
@@ -44,6 +49,8 @@ function app($key)
 {
     if (Application::$instance) {
         return Application::$instance->retrieve($key);
+    } else {
+        return null;
     }
 }
 
@@ -60,8 +67,10 @@ function route($name, ...$params)
     return Router::generateURL($name, ...$params);
 }
 
-function env($key)
+function env($key = null)
 {
+    if (!$key) return app('env');
+    
     $val = app('env')->get($key);
     if ($val) return $val;
     return null;

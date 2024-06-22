@@ -2,19 +2,34 @@
 
 namespace Solisty\Database;
 
-class Table {
+use Solisty\Database\Traits\HasColumns;
+
+class Table
+{
+    use HasColumns;
+
     private Operation $createOperation;
-     
-    public static function new(string $name, array $columns): Table {
-        ppd($columns);
 
+    public function __construct(public string $name)
+    {
     }
 
-    public static function update(string $name, array $columns) {
+    public static function new(string $name, array $columns): Table
+    {
         ppd($columns);
     }
 
-    public function op(int $op) {
+    public static function update(string $name, array $columns)
+    {
+        ppd($columns);
+    }
+
+    public function op(int $op)
+    {
         pp('op', $op);
+    }
+
+    public function getCreateQuery()
+    {
     }
 }

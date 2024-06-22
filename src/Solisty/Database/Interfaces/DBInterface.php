@@ -8,11 +8,12 @@ interface DBInterface
     public function isConnected(): bool;
     public function constructConnectionInfo(): array;
     public function queryUsing($query, $bindValues): bool;
+    public function query($query): bool;
     public function prepare(): void;
     public function havePrepared(): bool;
     public function containsValues(): bool;
     public function fetchOne(): array;
-    public function get();
+    public function fetchAll();
 
     // public function getInsertManyQuery(array $many);
     public static function typeFormat($value): string;

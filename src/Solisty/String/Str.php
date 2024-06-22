@@ -129,16 +129,25 @@ class Str
         return urldecode($str);
     }
 
-    public static function pluralize($word)
+    /**
+     * Pluralizes an English word.
+     *
+     * @param string $word The word to be pluralized.
+     * @return string The plural form of the word.
+     */
+    public static function pluralize(string $word): string
     {
         $irregular = array(
-            'child' => 'children',
-            'man' => 'men',
-            'woman' => 'women',
-            'tooth' => 'teeth',
-            'foot' => 'feet',
-            'person' => 'people',
-            'mouse' => 'mice'
+            'analysis' => 'analyses',
+            'basis' => 'bases',
+            'criterion' => 'criteria',
+            'datum' => 'data',
+            'diagnosis' => 'diagnoses',
+            'hypothesis' => 'hypotheses',
+            'index' => 'indices',
+            'phenomenon' => 'phenomena',
+            'synthesis' => 'syntheses',
+            'thesis' => 'theses'
         );
 
         if (array_key_exists($word, $irregular)) {
@@ -164,11 +173,66 @@ class Str
             case 's':
             case 'x':
             case 'z':
-            case 'ch':
-            case 'sh':
-                return $word . 'es';
+            case 'h':
+                if (preg_match('/(s|x|z|ch|sh)$/i', $word)) {
+                    return $word . 'es';
+                }
+                break;
             default:
                 return $word . 's';
         }
+
+        return $word . 's';
+    }
+
+    /**
+     * Singularizes an English word.
+     *
+     * @param string $word The word to be singularized.
+     * @return string The singular form of the word.
+     */
+    public static function singularize(string $word): string
+    {
+        $irregular = array(
+            'analyses' => 'analysis',
+            'bases' => 'basis',
+            'criteria' => 'criterion',
+            'data' => 'datum',
+            'diagnoses' => 'diagnosis',
+            'hypotheses' => 'hypothesis',
+            'indices' => 'index',
+            'phenomena' => 'phenomenon',
+            'syntheses' => 'synthesis',
+            'theses' => 'thesis'
+        );
+
+        if (array_key_exists($word, $irregular)) {
+            return $irregular[$word];
+        }
+
+        $uncountable = array(
+            'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep'
+        );
+
+        if (in_array($word, $uncountable)) {
+            return $word;
+        }
+
+        if (substr($word, -3) === 'ies') {
+            return substr($word, 0, -3) . 'y';
+        }
+
+        if (substr($word, -2) === 'es') {
+            $secondLastChar = strtolower($word[strlen($word) - 3]);
+            if (in_array(substr($word, -4, -2), ['ch', 'sh']) || in_array($secondLastChar, ['s', 'x', 'z'])) {
+                return substr($word, 0, -2);
+            }
+        }
+
+        if (substr($word, -1) === 's' && substr($word, -2) !== 'ss') {
+            return substr($word, 0, -1);
+        }
+
+        return $word;
     }
 }
