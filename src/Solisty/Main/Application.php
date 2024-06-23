@@ -17,11 +17,13 @@ class Application extends Context implements ApplicationInterface
     private string $appBase;
     private Database $db;
     private string $configPath;
+    private $startTime;
     private bool $started = false;
     public static ?Application $instance = null;
 
     public function __construct(public array $envo, public bool $debug, public bool $cliMode)
     {
+        $this->startTime = microtime(true);
         $this->initialize();
         $this->bindCommon();
         $this->bindConfigs();
@@ -66,8 +68,8 @@ class Application extends Context implements ApplicationInterface
 
             $this->injector
                 ->bind('session', new Session)
-                ->bind('auth', new Auth)
-                ->bind('db', $this->db);
+                ->bind('db', $this->db)
+                ->bind('auth', new Auth);
         }
 
         $this->injector
@@ -128,5 +130,10 @@ class Application extends Context implements ApplicationInterface
     public function setControllerValue($value)
     {
         $this->controllerValue = $value;
+    }
+
+    public function __destruct()
+    {
+        // ...
     }
 }

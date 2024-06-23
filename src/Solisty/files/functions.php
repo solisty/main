@@ -7,7 +7,7 @@ use Solisty\Main\Application;
 use Solisty\Routing\Router;
 use Solisty\View\View;
 
-function view($name, $data = [])
+function view($name, $data = []): View
 {
     $view = new View($name);
     return $view->with($data);

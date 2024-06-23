@@ -104,4 +104,9 @@ class Cache implements CacheInterface
     {
         return "file";
     }
+
+    public function __destruct()
+    {
+        $this->currentFile->close();
+    }
 }
