@@ -12,7 +12,7 @@ interface DBInterface
     public function prepare(): void;
     public function havePrepared(): bool;
     public function containsValues(): bool;
-    public function fetchOne(): array;
+    public function fetchOne(): array|bool;
     public function fetchAll();
 
     // public function getInsertManyQuery(array $many);

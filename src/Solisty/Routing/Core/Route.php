@@ -3,8 +3,7 @@
 namespace Solisty\Routing\Core;
 
 use Exception;
-use Middleware;
-use Solisty\Routing\Core\Middleware as CoreMiddleware;
+use Solisty\Http\Interfaces\MiddlewareInterface;
 
 class Route
 {
@@ -37,13 +36,18 @@ class Route
             return call_user_func_array($this->handler, $this->uri->getParameters());
         }
 
+        // TODO: create haveController method
         if (is_array($this->handler) && count($this->handler) === 2) {
-            $class = $this->handler[0];
-            $return = app('app')->call($class, $this->handler[1]);
-            return $return;
+            $result = app('app')->callControllerMethod(
+                $this->handler[0],
+                $this->handler[1],
+                $this->uri->getParameters()
+            );
+
+            return $result;
         }
 
-        throw new Exception('Invalid handler provided.');
+        throw new Exception('Invalid route handler provided.');
     }
 
     public function handleRedirect()
@@ -97,12 +101,12 @@ class Route
     private function configureMiddlewares(array $middlewares)
     {
         foreach ($middlewares as $middleware) {
-            if (class_exists($middleware, true)) {
-                $obj = new $middleware;
-                
-                if ($obj instanceof \Solisty\Routing\Core\Middleware) {
-                    array_push($this->middlewares, $obj);
-                }
+            $middlewareClass = app()
+                ->on('app.middlewares')
+                ->resolve($middleware);
+
+            if ($middlewareClass) {
+                $this->middlewares[] = new $middlewareClass;
             }
         }
     }
@@ -115,15 +119,16 @@ class Route
             $this->configureMiddlewares([$middlewares]);
     }
 
-    private function preHandleMiddlewares() {
-        foreach($this->middlewares as $m) {
+    private function preHandleMiddlewares()
+    {
+        foreach ($this->middlewares as $m) {
             $m->handle();
         }
     }
 
-    // should be public because we are trying to 
-    public function postHandleMiddlewares() {
-        foreach($this->middlewares as $m) {
+    public function postHandleMiddlewares()
+    {
+        foreach ($this->middlewares as $m) {
             $m->terminate();
         }
     }

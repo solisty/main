@@ -9,9 +9,9 @@ class HashList implements ListInterface, HashListInterface
 {
     protected array $data;
 
-    public function __construct()
+    public function __construct($data = [])
     {
-        $this->data = [];
+        $this->data = $data;
     }
 
     public function add($key, $value)
@@ -146,5 +146,27 @@ class HashList implements ListInterface, HashListInterface
     public function has($key)
     {
         return isset($this->data[$key]);
+    }
+
+    // returns a one dimensional array where all nested 
+    // keys are flattened into a single key with dot notation
+    public function flatten($prefix = '', &$flattened = null, $data = null): array
+    {
+        if ($flattened === null) {
+            $flattened = [];
+        }
+        if ($data === null) {
+            $data = $this->data;
+        }
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $this->flatten($prefix . '.' . $key . '.', $flattened, $value);
+            } else {
+                $flattened[$prefix . $key] = $value;
+            }
+        }
+
+        return $flattened;
     }
 }

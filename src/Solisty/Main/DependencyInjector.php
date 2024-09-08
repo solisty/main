@@ -13,6 +13,7 @@ class DependencyInjector
 {
     protected array $bindings = [];
 
+    // resolve an already bound class
     public function resolve($class)
     {
         if (isset($this->bindings[$class])) {
@@ -31,8 +32,8 @@ class DependencyInjector
                 }
 
                 return $result;
-            } else {
-                return $binding;
+            } else if (is_string($binding)) {
+                return new $binding;
             }
 
             return $binding;
@@ -90,6 +91,15 @@ class DependencyInjector
         return $this;
     }
 
+    public function bindArray($pairs)
+    {
+        foreach ($pairs as $key => $value) {
+            $this->bindings[$key] = $value;
+        }
+
+        return $this;
+    }
+
     // add a string shortcut to the last added binding
     public function shortcut(string $shortcut)
     {
@@ -126,5 +136,50 @@ class DependencyInjector
         $object = is_array($callback) ? $this->resolve($callback[0]) : null;
 
         return $reflection->invokeArgs($object, $resolvedDependencies);
+    }
+
+    public function resolveIfImplements($class, $interface)
+    {
+        if ($this->bound($class))
+            $reflection = new ReflectionClass($class);
+
+        if ($reflection->implementsInterface($interface)) {
+            return $this->resolve($class);
+        }
+
+        return null;
+    }
+
+    public function resolveIfParent($class, $parent)
+    {
+        $reflection = new ReflectionClass($class);
+
+        if ($reflection->isSubclassOf($parent)) {
+            return $this->resolve($class);
+        }
+
+        return null;
+    }
+
+    public function resolveIfChild($class, $child)
+    {
+        $reflection = new ReflectionClass($class);
+
+        if ($reflection->isSubclassOf($child)) {
+            return $this->resolve($class);
+        }
+
+        return null;
+    }
+
+    public function resolveIfHasMethod($class, $method)
+    {
+        $reflection = new ReflectionClass($class);
+
+        if ($reflection->hasMethod($method)) {
+            return $this->resolve($class);
+        }
+
+        return null;
     }
 }

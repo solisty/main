@@ -3,6 +3,7 @@
 use Solisty\Dumper\Dumper;
 use Solisty\Http\Session\Session;
 use Solisty\List\ArrayList;
+use Solisty\List\HashList;
 use Solisty\Main\Application;
 use Solisty\Routing\Router;
 use Solisty\View\View;
@@ -23,7 +24,7 @@ function pp(...$args)
 function ppd(...$args)
 {
     pp(...$args);
-    die('');
+    exit(1);
 }
 
 function response()
@@ -45,12 +46,17 @@ function listify(...$args): ArrayList
     return new ArrayList(array_values(...$args));
 }
 
-function app($key)
+function hash_listify(...$args): HashList
 {
-    if (Application::$instance) {
+    return new HashList(...$args);
+}
+
+function app($key = null)
+{
+    if (Application::$instance && $key) {
         return Application::$instance->retrieve($key);
     } else {
-        return null;
+        return Application::$instance;
     }
 }
 
@@ -70,7 +76,7 @@ function route($name, ...$params)
 function env($key = null)
 {
     if (!$key) return app('env');
-    
+
     $val = app('env')->get($key);
     if ($val) return $val;
     return null;

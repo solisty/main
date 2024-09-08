@@ -64,7 +64,11 @@ class Auth extends Session
 
     public function user()
     {
-        return $this->currentUser;
+        if ($this->currentUser) {
+            return $this->currentUser;
+        } 
+        
+        return null;
     }
 
     public function cookie(): string

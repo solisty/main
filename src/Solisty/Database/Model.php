@@ -44,9 +44,12 @@ class Model extends Queryable
         $callingClass = static::class;
         $object = new $callingClass;
 
-        $object->propreties = $results;
+        if ($results) {
+            $object->propreties = $results;
+            return $object;
+        }
 
-        return $object;
+        return null;
     }
 
     public function __get($prop)
@@ -80,6 +83,9 @@ class Model extends Queryable
 
     public function __call($name, $arguments)
     {
+        if (isset($this->relations[$name])) {
+            return $this->relations[$name];
+        }
         return $this;
     }
 

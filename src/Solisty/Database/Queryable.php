@@ -68,6 +68,25 @@ class Queryable implements QueryableInterface
         return static::class::fromResult($db->getDriver()->fetchOne());
     }
 
+    // get the first n results from the query
+    // if the $num > 1 return a list otherwise return a single object
+    public static function first($num = 1) {
+        $db = app('db');
+        [$query, $values] = self::$queryBuilder->getRawQuery();
+        $db->query($query, $values);
+        $result = $db->getDriver()->fetchAll();
+        $resu = [];
+        foreach ($result as $row) {
+            $resu[] = static::class::fromResult($row);
+        }
+        return $num > 1 ? listify($resu) : $resu[0];
+    }
+
+    // get the latest result from the query
+    public static function latest($num = 1) {
+
+    }
+
     public static function search()
     {
         return new Queryable();

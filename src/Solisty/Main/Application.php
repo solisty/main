@@ -7,6 +7,7 @@ use Solisty\Authentication\Auth;
 use Solisty\Cache\Cache;
 use Solisty\Database\Database;
 use Solisty\FileSystem\Directory;
+use Solisty\FileSystem\File;
 use Solisty\Http\Request;
 use Solisty\Http\Session\Session;
 use Solisty\Main\Interfaces\ApplicationInterface;
@@ -23,6 +24,7 @@ class Application extends Context implements ApplicationInterface
 
     public function __construct(public array $envo, public bool $debug, public bool $cliMode)
     {
+        parent::__construct();
         $this->startTime = microtime(true);
         $this->initialize();
         $this->bindCommon();
@@ -37,7 +39,7 @@ class Application extends Context implements ApplicationInterface
     public function handle(Request $request)
     {
         // make the current request accessible to the rest of the app
-        $this->injector->bind(Request::class, $request);
+        $this->bind(Request::class, $request);
         // create a response
         $response = $this->makeResponse($request);
         // send it!
@@ -56,8 +58,7 @@ class Application extends Context implements ApplicationInterface
     public function bindCommon()
     {
         // order is important
-        $this->injector
-            ->bind('app.started', $this->started)
+        $this->bind('app.started', $this->started)
             ->bind('app.debug', $this->debug)
             ->bind('env', $this->env)
             ->bind('app', $this);
@@ -66,24 +67,24 @@ class Application extends Context implements ApplicationInterface
             $this->db = new Database();
             $this->db->connect();
 
-            $this->injector
-                ->bind('session', new Session)
+            $this->bind('session', new Session)
                 ->bind('db', $this->db)
                 ->bind('auth', new Auth);
         }
 
-        $this->injector
+        $this
             ->bind('router', Router::class);
 
         // TODO: get cache driver from config
         // TODO: set up file cache path
-        $this->injector->bind(Cache::class, function () {
+        $this->bind(Cache::class, function () {
             return (new Cache())->driver();
         })->shortcut("cache");
     }
 
     public function bindConfigs()
     {
+        // this routine should be cached
         $configPath = env('APP_BASE') . '/conf';
         $this->env->add('CONFIG_PATH', $configPath);
         if (Directory::exists($configPath)) {
@@ -92,7 +93,13 @@ class Application extends Context implements ApplicationInterface
                 $conf = include $file;
 
                 if ($conf && is_array($conf)) {
-                    ppd("TODO: handle configs");
+                    foreach ($conf as $key => $value) {
+                        if (is_array($value)) {
+                            $this->on('app.' . $key)->bindArray($value);
+                        } else {
+                            $this->bind('app.' . $key, $value);
+                        }
+                    }
                 }
             }
         } else {
@@ -105,9 +112,9 @@ class Application extends Context implements ApplicationInterface
         // $this->routesPath = $this->env->get('ROUTES_PATH');
         $this->configPath = $this->env->get('CONFIG_PATH');
 
-        $this->injector->bind('path.app', $this->appBase);
+        $this->bind('path.app', $this->appBase);
         // $this->injector->bind('path.routes', $this->routesPath);
-        $this->injector->bind('path.config', $this->configPath);
+        $this->bind('path.config', $this->configPath);
     }
 
     public function initialize()
@@ -117,14 +124,15 @@ class Application extends Context implements ApplicationInterface
         $whoops->register();
 
         $this->setEnv($this->envo);
-        $this->injector = new DependencyInjector();
         static::$instance = $this;
         $this->appBase = $this->env->get('APP_BASE');
     }
 
-    public function bind($key, $value)
+    public function bind($key, $value): DependencyInjector
     {
-        $this->injector->bind($key, $value);
+        $this->bindGlobalScope($key, $value);
+
+        return $this->globalScope;
     }
 
     public function setControllerValue($value)

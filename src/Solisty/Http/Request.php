@@ -159,7 +159,7 @@ class Request
 
     public function isSuspicious(): bool
     {
-        // Placeholder implementation for checking suspicious request
+
         return false;
     }
 
@@ -177,10 +177,7 @@ class Request
         return $this->isBot();
     }
 
-    public function saveAllFiles(): void
-    {
-        // Implementation for saving all files goes here
-    }
+    public function saveAllFiles(): void {}
 
     public function json(): array
     {
@@ -189,19 +186,13 @@ class Request
 
     public function validate(array $rules): bool
     {
-        // Implementation for request validation goes here
+
         return true;
     }
 
-    public function user()
-    {
-        // Implementation for retrieving the authenticated user goes here
-    }
+    public function user() {}
 
-    public function validator()
-    {
-        // Implementation for retrieving the validator instance goes here
-    }
+    public function validator() {}
 
     public function abort(int $statusCode = 400): void
     {
@@ -214,5 +205,9 @@ class Request
         $uri = $_SERVER['REQUEST_URI'] ?? '';
         return preg_match('/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i', $uri) > 0;
     }
+
+    public function isJson(): bool
+    {
+        return Str::endsWith($_SERVER['HTTP_ACCEPT'], 'application/json');
+    }
 }
-?>

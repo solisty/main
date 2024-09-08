@@ -97,7 +97,7 @@ class MySQL implements DBInterface
         return $this->prepared->execute();
     }
 
-    public function fetchOne(): array
+    public function fetchOne(): array|bool
     {
         return $this->prepared->fetch(PDO::FETCH_ASSOC);
     }
