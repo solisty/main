@@ -4,9 +4,6 @@ namespace Solisty\CommandLine\Commands\Builtin;
 
 use Exception;
 use Solisty\CommandLine\Commands\Command;
-use Solisty\CommandLine\Process;
-use Solisty\CommandLine\Traits\CaptureOutput;
-use Solisty\CommandLine\Traits\CaptureStdout;
 use Solisty\Database\Database;
 use Solisty\Database\Operation;
 
