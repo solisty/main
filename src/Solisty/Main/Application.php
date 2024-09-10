@@ -70,10 +70,9 @@ class Application extends Context implements ApplicationInterface
             $this->bind('session', new Session)
                 ->bind('db', $this->db)
                 ->bind('auth', new Auth);
-        }
 
-        $this
-            ->bind('router', Router::class);
+            $this->bind('router', Router::class);
+        }
 
         // TODO: get cache driver from config
         // TODO: set up file cache path

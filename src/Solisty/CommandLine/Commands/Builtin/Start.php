@@ -5,11 +5,11 @@ namespace Solisty\CommandLine\Commands\Builtin;
 use Solisty\CommandLine\Commands\Command;
 use Solisty\CommandLine\Process;
 use Solisty\CommandLine\Traits\CaptureOutput;
-use Solisty\CommandLine\Traits\CaptureStdout;
+use Solisty\CommandLine\Traits\Colors;
 
 class Start extends Command
 {
-    use CaptureOutput;
+    use CaptureOutput, Colors;
 
     public function __construct()
     {
@@ -31,7 +31,17 @@ class Start extends Command
 
     public function onStart(array $env)
     {
-        //
+        echo "\v\v{$this->colorize('Server Started', 'yellow')}\v {$this->colorize('http://localhost:8888', 'blue')}\n\n";
+    }
+
+    public function onRead(string $line)
+    {
+        if (strpos($line, 'Development Server') !== false) {
+            return;
+        }
+
+        $line = preg_replace('/(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)/', $this->colorize('$1', 'yellow'), $line);
+        echo $line;
     }
 
     // called when cmd is done running

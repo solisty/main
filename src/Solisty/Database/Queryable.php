@@ -8,7 +8,7 @@ use Solisty\String\Str;
 
 class Queryable implements QueryableInterface
 {
-    protected static string $table = '';
+    protected static string $_table = '';
     private static QueryBuilder $queryBuilder;
 
     public static function select(array $columns)

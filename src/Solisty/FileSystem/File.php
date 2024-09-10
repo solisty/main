@@ -162,4 +162,5 @@ class File implements FileInterface
     {
         $this->close();
     }
+
 }

@@ -28,6 +28,11 @@ class Directory implements DirectoryInterface
         return isset($this->path);
     }
 
+    /**
+     * List all files in the directory
+     *
+     * @return array
+     */
     public function list(): array
     {
         $openFiles = [];
@@ -35,6 +40,28 @@ class Directory implements DirectoryInterface
             foreach (Directory::ls($this->path) as $path) {
                 $file = new File();
                 $file->open($this->path . '/' . $path);
+                if ($file->isOpen()) {
+                    $openFiles[] = $file;
+                }
+            }
+            return $openFiles;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * List all files in the directory recursively
+     *
+     * @return File[]
+     */
+    public function listAll(): array
+    {
+        $openFiles = [];
+        if ($this->isOpen()) {
+            foreach (Directory::lslad($this->path) as $path) {
+                $file = new File();
+                $file->open($path);
                 if ($file->isOpen()) {
                     $openFiles[] = $file;
                 }
@@ -77,12 +104,30 @@ class Directory implements DirectoryInterface
         return is_dir($path) ? scandir($path) : [];
     }
 
+    // lists all files and nested files in a directory
+    public static function lslad(string $path): array
+    {
+        $files = [];
+        $items = static::ls($path);
+        foreach ($items as $item) {
+            if ($item !== '.' && $item !== '..') {
+                $itemPath = $path . DIRECTORY_SEPARATOR . $item;
+                if (is_file($itemPath)) {
+                    $files[] = $itemPath;
+                } elseif (is_dir($itemPath)) {
+                    $files = array_merge($files, static::lslad($itemPath));
+                }
+            }
+        }
+        return $files;
+    }
+
     public static function mkdir(string $path)
     {
         mkdir($path, 0777, true);
     }
 
-    public static function traverse(string $path)
+    public static function traverse(string $path): array
     {
         $files = [];
 
@@ -125,4 +170,22 @@ class Directory implements DirectoryInterface
         }
         return '';
     }
+
+	/**
+	 * list all files absolutely to the current path:
+	 * @return array
+	 */
+	public function getAbsoluteFilesPath(): array
+	{
+		$absolutePaths = [];
+
+		if ($this->isOpen()) {
+			$files = Directory::lslad($this->path);
+			foreach ($files as $file) {
+				$absolutePaths[] = str_replace($this->path . DIRECTORY_SEPARATOR, '', $file);
+			}
+		}
+
+		return $absolutePaths;
+	}
 }

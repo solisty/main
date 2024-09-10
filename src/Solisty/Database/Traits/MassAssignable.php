@@ -4,7 +4,7 @@ namespace Solisty\Database\Traits;
 
 trait MassAssignable
 {
-    protected array $assignables = [];
+    protected array $_assignables = [];
 
     protected function isAssignable(string $prop)
     {

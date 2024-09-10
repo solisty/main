@@ -20,11 +20,6 @@ trait CaptureOutput
         }
     }
 
-    public function onRead(string $content)
-    {
-        echo $content;
-    }
-
     public function getStreamType()
     {
         return "stdout";

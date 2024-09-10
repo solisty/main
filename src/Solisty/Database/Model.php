@@ -13,7 +13,6 @@ class Model extends Queryable
     // use Duplicatable;
     use MassAssignable;
 
-    protected array $relations;
     private array $propreties = [];
 
     public function save()
