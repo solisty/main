@@ -4,21 +4,22 @@ namespace Solisty\Database\ColumnTypes;
 
 use Solisty\Database\Interfaces\ColumnType as ColumnTypeInterface;
 
-class Str extends ColumnType implements ColumnTypeInterface
+class ShortString extends ColumnType implements ColumnTypeInterface
 {
-    /**
-     * String constructor
-     *
-     * @param string $name
-     * @param int $length
-     * @param bool $nullable
-     * @param string|null $default
-     */
+	use \Solisty\Database\Traits\ColumnType;
+
+	/**
+	 * ShortString constructor
+	 *
+	 * @param bool $nullable
+	 * @param string|null $default
+	 */
     public function __construct(
-        public int $length = 255,
         public bool $nullable = false,
-        public ?string $default = null
-    ) {}
+        public ?string $default = null,
+    ) {
+	    parent::__construct(nullable: $nullable, length: 255);
+    }
 
     /**
      * Get the type of the column
@@ -28,16 +29,6 @@ class Str extends ColumnType implements ColumnTypeInterface
     public function getType(): string
     {
         return 'VARCHAR';
-    }
-
-    /**
-     * Get the length of the column
-     *
-     * @return int
-     */
-    public function getLength(): int
-    {
-        return $this->length;
     }
 
     /**

@@ -17,7 +17,8 @@ class Auth extends Session
         parent::__construct();
         if ($this->get('authenticated')) {
             $this->isLogged = true;
-            $this->currentUser = $this->userModel::find($this->get('authenticated_user_id'));
+            // TODO: after completing Schema system
+            // $this->currentUser = $this->userModel::find($this->get('authenticated_user_id'));
         }
     }
 

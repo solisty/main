@@ -2,7 +2,9 @@
 
 namespace Solisty\Database;
 
+use ReflectionException;
 use Solisty\Database\ColumnTypes\Integer;
+use Solisty\String\Str;
 
 // example
 class ExampleModel
@@ -41,76 +43,64 @@ class SchemaGenerator
 	public function __construct(Model $model)
 	{
 		$this->model = $model;
-		$this->schema = new Schema();
+		$table = get_class($model);
+		$table = substr($table, strrpos($table, '\\') + 1);
+		$this->schema = new Schema(Str::lowercase(Str::pluralize($table)));
 	}
 
 	/**
-	 * Generates a Schema that represents the model
+	 * Generates a Schema representing the model provided in the constructor
 	 * @return Schema|null
+	 * @throws ReflectionException
 	 */
 	public function generate(): ?Schema
 	{
-		try {
-			$reflection = new \ReflectionClass($this->model);
-			$properties = $reflection->getProperties(\ReflectionProperty::IS_PROTECTED);
 
-			foreach ($properties as $property) {
-				$name = $property->getName();
+		$reflection = new \ReflectionClass($this->model);
+		$properties = $reflection->getProperties(\ReflectionProperty::IS_PROTECTED);
 
-				if (str_starts_with($name, "_")) {
-					continue;
-				}
+		foreach ($properties as $property) {
+			$name = $property->getName();
 
-				// type here is our high level representation
-				$type = $property->getType();
-				// default value of the column if present
-				$default = $this->getModelColumnDefaultValue($name);
-				// is the column auto increment
-				$autoIncrement = $this->getModelColumnAutoIncrement($name);
-				// is NULL allowed as a value
-				$nullable = $this->getModelColumnNullable($name);
-
-				if ($type === null) {
-					continue;
-				}
-
-				$column = new SchemaColumn(
-					name: $name,
-					type: $type,
-					autoIncrement: $autoIncrement,
-					nullable: $nullable,
-					default: $default
-				);
-				$this->schema->addColumn($column);
+			if (str_starts_with($name, "_")) {
+				continue;
 			}
 
-			return $this->schema;
-		} catch (\ReflectionException $e) {
-			echo $e->getMessage();
-			return null;
+			// TODO: check for for types (i.e db compatible)
+
+			// type here is our high level representation
+			$type = $property->getType();
+			// default value of the column if present
+			$default = $this->model->{$name}->default ?? $property->getDefaultValue();
+			// is the column auto increment
+			$autoIncrement = $this->model->{$name}->isNumeric() ? $this->model->{$name}->autoIncrement : false;
+			// is NULL allowed as a value
+			$nullable = $property->getType()->allowsNull();
+			// the length
+			$length = $this->model->{$name}->getLength();
+			// TODO: add more attributes
+
+			if ($type === null) {
+				continue;
+			}
+
+			$column = new SchemaColumn(
+				name: $name,
+				type: $type,
+				autoIncrement: $autoIncrement,
+				nullable: $nullable,
+				default: $default,
+				length: $length
+			);
+			$this->schema->addColumn($column);
 		}
+
+		return $this->schema;
+
 	}
 
 	public function getModel(): ?Model
 	{
 		return $this->model;
-	}
-
-	private function getModelColumnAutoIncrement(string $col): bool
-	{
-		// TODO
-		return false;
-	}
-
-	private function getModelColumnNullable(string $col): bool
-	{
-		// TODO
-		return false;
-	}
-
-	private function getModelColumnDefaultValue(string $col)
-	{
-		// TODO
-		return null;
 	}
 }

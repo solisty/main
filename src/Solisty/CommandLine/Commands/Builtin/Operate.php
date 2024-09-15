@@ -8,6 +8,7 @@ use Solisty\CommandLine\Commands\Command;
 use Solisty\Database\Database;
 use Solisty\Database\Operation;
 use Solisty\Database\SchemaGenerator;
+use Solisty\Database\SchemaSnapshot;
 use Solisty\FileSystem\Directory;
 use Solisty\FileSystem\File;
 use Solisty\String\Str;
@@ -23,23 +24,35 @@ class Operate extends Command
 
 	public function run(array $argv)
 	{
-		// $this->db = new Database();
-		// $this->db->connect();
-
-		// $this->runCreateOperations();
+		ini_set('display_errors', 1);
+		ini_set('display_startup_errors', 1);
+		error_reporting(E_ALL);
+		$this->db = new Database();
+		$this->db->connect();
 
 		// loop through models directory recursively
 		$models = Directory::underNamespace('App\Models')->getAbsoluteFilesPath();
 		$schemas = [];
 
 		foreach ($models as $model) {
-			$className = Str::split(basename($model), '.')[0];
-			$namespace = Str::replace($model, $className . '.php', '');
-			$namespaced = "\\App\\Models\\" . $namespace . $className;
-			$object = new $namespaced();
-			$schemas[] = (new SchemaGenerator($object))->generate();
+			try {
+				$className = Str::split(basename($model), '.')[0];
+				$namespace = Str::replace($model, $className . '.php', '');
+				$namespaced = "\\App\\Models\\" . $namespace . $className;
+				$object = new $namespaced();
+				$schemas[] = (new SchemaGenerator($object))->generate();
+			} catch (Exception $e) {
+				// TODO: error reporting for CLI
+				echo $e->getMessage();
+				echo $e->getTraceAsString();
+			}
 		}
-		print_r($schemas);
+
+		foreach ($schemas as $schema) {
+			$sql = $schema->getCreateSql();
+			echo $sql . "\n";
+			var_dump($this->db->query($sql));
+		}
 	}
 
 

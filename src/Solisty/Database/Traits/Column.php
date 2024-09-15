@@ -2,7 +2,7 @@
 
 namespace Solisty\Database\Traits;
 
-class Column
+trait Column
 {
     use ColumnTypes;
 

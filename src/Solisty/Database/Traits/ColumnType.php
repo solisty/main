@@ -2,7 +2,7 @@
 namespace Solisty\Database\Traits;
 
 trait ColumnType {
-    public const INT = 'INT';
+    public const INT = 'INTEGER';
     public const VARCHAR = 'VARCHAR';
     public const TEXT = 'TEXT';
     public const DATE = 'DATE';
@@ -26,19 +26,14 @@ trait ColumnType {
     public const MULTIPOLYGON = 'MULTIPOLYGON';
     public const GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
-    /**
-     * ColumnType constructor
-     *
-     * @param string $name
-     * @param int $length
-     * @param bool $unsigned
-     * @param bool $autoIncrement
-     * @param bool $nullable
-     * @param string|null $default
-     */
-    public static function isNumeric(string $type): bool
+	/**
+	 * ColumnType constructor
+	 *
+	 * @return bool
+	 */
+    public function isNumeric(): bool
     {
-        return in_array($type, [self::INT, self::FLOAT, self::DOUBLE, self::DECIMAL]);
+        return in_array($this->getType(), [self::INT, self::FLOAT, self::DOUBLE, self::DECIMAL]);
     }
 
     /**
@@ -46,9 +41,9 @@ trait ColumnType {
      *
      * @return bool
      */
-    public static function isString(string $type): bool
+    public function isString(): bool
     {
-        return in_array($type, [self::VARCHAR, self::TEXT]);
+        return in_array($this->getType(), [self::VARCHAR, self::TEXT]);
     }
 
     /**
@@ -56,9 +51,9 @@ trait ColumnType {
      *
      * @return bool
      */
-    public static function isTemporal(string $type): bool
+    public function isTemporal(): bool
     {
-        return in_array($type, [self::DATE, self::DATETIME, self::TIMESTAMP, self::TIME]);
+        return in_array($this->getType(), [self::DATE, self::DATETIME, self::TIMESTAMP, self::TIME]);
     }
 
     /**
@@ -66,9 +61,9 @@ trait ColumnType {
      *
      * @return bool
      */
-    public static function isSpatial(string $type): bool
+    public function isSpatial(): bool
     {
-        return in_array($type, [
+        return in_array($this->getType(), [
             self::GEOMETRY,
             self::POINT,
             self::LINESTRING,
@@ -85,8 +80,8 @@ trait ColumnType {
      *
      * @return bool
      */
-    public static function isJson(string $type): bool
+    public function isJson(): bool
     {
-        return $type === self::JSON;
+        return $this->getType() === self::JSON;
     }
 }
